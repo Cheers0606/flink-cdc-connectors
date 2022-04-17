@@ -37,7 +37,6 @@ import com.ververica.cdc.connectors.oracle.source.reader.fetch.OracleStreamFetch
 import com.ververica.cdc.connectors.oracle.source.utils.OracleConnectionUtils;
 import com.ververica.cdc.connectors.oracle.source.utils.OracleSchema;
 import io.debezium.connector.oracle.OracleConnection;
-import io.debezium.connector.oracle.OracleConnectorConfig;
 import io.debezium.jdbc.JdbcConnection;
 import io.debezium.relational.TableId;
 import io.debezium.relational.history.TableChanges.TableChange;
@@ -82,10 +81,7 @@ public class OracleDialect implements JdbcDataSourceDialect {
     public boolean isDataCollectionIdCaseSensitive(JdbcSourceConfig sourceConfig) {
         try (JdbcConnection jdbcConnection = openJdbcConnection(sourceConfig)) {
             OracleConnection oracleConnection = (OracleConnection) jdbcConnection;
-            OracleSourceConfig oracleSourceConfig = (OracleSourceConfig) sourceConfig;
-            OracleConnectorConfig oracleConnectorConfig =
-                    oracleSourceConfig.getDbzConnectorConfig();
-            return oracleConnection.getTablenameCaseInsensitivity(oracleConnectorConfig);
+            return oracleConnection.getOracleVersion().getMajor() == 11;
         } catch (SQLException e) {
             throw new FlinkRuntimeException("Error reading oracle variables: " + e.getMessage(), e);
         }

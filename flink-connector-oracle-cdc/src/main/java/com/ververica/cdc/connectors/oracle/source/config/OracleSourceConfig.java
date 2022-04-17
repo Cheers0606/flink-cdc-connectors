@@ -87,6 +87,10 @@ public class OracleSourceConfig extends JdbcSourceConfig {
         return new OracleConnectorConfig(getDbzConfiguration());
     }
 
+    public Configuration getOriginDbzConnectorConfig() {
+        return super.getDbzConfiguration();
+    }
+
     public RelationalTableFilters getTableFilters() {
         return getDbzConnectorConfig().getTableFilters();
     }

@@ -41,6 +41,7 @@ import io.debezium.connector.oracle.OracleStreamingChangeEventSourceMetrics;
 import io.debezium.connector.oracle.OracleTaskContext;
 import io.debezium.connector.oracle.OracleTopicSelector;
 import io.debezium.connector.oracle.SourceInfo;
+import io.debezium.connector.oracle.logminer.LogMinerOracleOffsetContextLoader;
 import io.debezium.data.Envelope;
 import io.debezium.pipeline.DataChangeEvent;
 import io.debezium.pipeline.ErrorHandler;
@@ -98,11 +99,10 @@ public class OracleSourceFetchTaskContext extends JdbcSourceFetchTaskContext {
                         .getString(EmbeddedFlinkDatabaseHistory.DATABASE_HISTORY_INSTANCE_NAME),
                 sourceSplitBase.getTableSchemas().values());
         this.databaseSchema = OracleUtils.createOracleDatabaseSchema(connectorConfig);
+        // todo logMiner or xStream
         this.offsetContext =
                 loadStartingOffsetState(
-                        new OracleOffsetContext.Loader(
-                                connectorConfig, OracleConnectorConfig.ConnectorAdapter.LOG_MINER),
-                        sourceSplitBase);
+                        new LogMinerOracleOffsetContextLoader(connectorConfig), sourceSplitBase);
         validateAndLoadDatabaseHistory(offsetContext, databaseSchema);
 
         this.taskContext = new OracleTaskContext(connectorConfig, databaseSchema);

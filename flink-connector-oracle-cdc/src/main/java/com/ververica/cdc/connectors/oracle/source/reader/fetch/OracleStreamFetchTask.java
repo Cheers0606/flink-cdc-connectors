@@ -29,7 +29,6 @@ import io.debezium.connector.oracle.OracleConnectorConfig;
 import io.debezium.connector.oracle.OracleDatabaseSchema;
 import io.debezium.connector.oracle.OracleOffsetContext;
 import io.debezium.connector.oracle.OracleStreamingChangeEventSourceMetrics;
-import io.debezium.connector.oracle.OracleTaskContext;
 import io.debezium.connector.oracle.logminer.LogMinerStreamingChangeEventSource;
 import io.debezium.pipeline.ErrorHandler;
 import io.debezium.pipeline.source.spi.ChangeEventSource;
@@ -65,13 +64,13 @@ public class OracleStreamFetchTask implements FetchTask<SourceSplitBase> {
                         sourceFetchContext.getDispatcher(),
                         sourceFetchContext.getErrorHandler(),
                         sourceFetchContext.getDatabaseSchema(),
-                        sourceFetchContext.getSourceConfig().getDbzConnectorConfig().jdbcConfig(),
-                        sourceFetchContext.getTaskContext(),
+                        sourceFetchContext.getSourceConfig().getOriginDbzConnectorConfig(),
                         sourceFetchContext.getStreamingChangeEventSourceMetrics(),
                         split);
-        BinlogSplitChangeEventSourceContext changeEventSourceContext =
-                new BinlogSplitChangeEventSourceContext();
-        redoLogSplitReadTask.execute(changeEventSourceContext);
+        RedoLogSplitChangeEventSourceContext changeEventSourceContext =
+                new RedoLogSplitChangeEventSourceContext();
+        redoLogSplitReadTask.execute(
+                changeEventSourceContext, sourceFetchContext.getOffsetContext());
     }
 
     @Override
@@ -105,18 +104,15 @@ public class OracleStreamFetchTask implements FetchTask<SourceSplitBase> {
                 ErrorHandler errorHandler,
                 OracleDatabaseSchema schema,
                 Configuration jdbcConfig,
-                OracleTaskContext taskContext,
                 OracleStreamingChangeEventSourceMetrics metrics,
                 StreamSplit redoLogSplit) {
             super(
                     connectorConfig,
-                    offsetContext,
                     connection,
                     dispatcher,
                     errorHandler,
                     Clock.SYSTEM,
                     schema,
-                    taskContext,
                     jdbcConfig,
                     metrics);
             this.redoLogSplit = redoLogSplit;
@@ -126,9 +122,9 @@ public class OracleStreamFetchTask implements FetchTask<SourceSplitBase> {
         }
 
         @Override
-        public void execute(ChangeEventSourceContext context) {
+        public void execute(ChangeEventSourceContext context, OracleOffsetContext offsetContext) {
             this.context = context;
-            super.execute(context);
+            super.execute(context, offsetContext);
         }
 
         // TODO: how to stop for fetch binlog for snapshot split? we can reimplements
@@ -153,7 +149,7 @@ public class OracleStreamFetchTask implements FetchTask<SourceSplitBase> {
     /**
      * The {@link ChangeEventSource.ChangeEventSourceContext} implementation for binlog split task.
      */
-    private class BinlogSplitChangeEventSourceContext
+    private class RedoLogSplitChangeEventSourceContext
             implements ChangeEventSource.ChangeEventSourceContext {
         @Override
         public boolean isRunning() {

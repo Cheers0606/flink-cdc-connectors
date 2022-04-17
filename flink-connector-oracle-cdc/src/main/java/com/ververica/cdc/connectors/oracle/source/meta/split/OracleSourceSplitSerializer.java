@@ -1,5 +1,10 @@
 package com.ververica.cdc.connectors.oracle.source.meta.split;
 
+import org.apache.flink.core.memory.DataInputDeserializer;
+import org.apache.flink.core.memory.DataOutputSerializer;
+import org.apache.flink.table.types.logical.RowType;
+import org.apache.flink.table.types.logical.utils.LogicalTypeParser;
+
 import com.ververica.cdc.connectors.base.source.meta.offset.Offset;
 import com.ververica.cdc.connectors.base.source.meta.offset.OffsetFactory;
 import com.ververica.cdc.connectors.base.source.meta.split.FinishedSnapshotSplitInfo;
@@ -14,10 +19,6 @@ import io.debezium.document.Document;
 import io.debezium.document.DocumentReader;
 import io.debezium.relational.TableId;
 import io.debezium.relational.history.TableChanges;
-import org.apache.flink.core.memory.DataInputDeserializer;
-import org.apache.flink.core.memory.DataOutputSerializer;
-import org.apache.flink.table.types.logical.RowType;
-import org.apache.flink.table.types.logical.utils.LogicalTypeParser;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -26,14 +27,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * @author Enoch on 2022/4/21
- */
+/** An Oracle serializer for the {@link SourceSplitBase}. */
 public class OracleSourceSplitSerializer extends SourceSplitSerializer {
 
     private static final int SNAPSHOT_SPLIT_FLAG = 1;
     private static final int REDOLOG_SPLIT_FLAG = 2;
     RedoLogOffsetFactory offsetFactory;
+
     public OracleSourceSplitSerializer(RedoLogOffsetFactory offsetFactory) {
         this.offsetFactory = offsetFactory;
     }
@@ -44,7 +44,8 @@ public class OracleSourceSplitSerializer extends SourceSplitSerializer {
     }
 
     @Override
-    public Offset readOffsetPosition(int offsetVersion, DataInputDeserializer in) throws IOException {
+    public Offset readOffsetPosition(int offsetVersion, DataInputDeserializer in)
+            throws IOException {
         return super.readOffsetPosition(offsetVersion, in);
     }
 
@@ -125,12 +126,13 @@ public class OracleSourceSplitSerializer extends SourceSplitSerializer {
             throw new IOException("Unknown split kind: " + splitKind);
         }
     }
+
     private List<FinishedSnapshotSplitInfo> readFinishedSplitsInfo(
             int version, DataInputDeserializer in) throws IOException {
         List<FinishedSnapshotSplitInfo> finishedSplitsInfo = new ArrayList<>();
         final int size = in.readInt();
         for (int i = 0; i < size; i++) {
-            TableId tableId = TableId.parse(in.readUTF(),false);
+            TableId tableId = TableId.parse(in.readUTF(), false);
             String splitId = in.readUTF();
             Object[] splitStart = SerializerUtils.serializedStringToRow(in.readUTF());
             Object[] splitEnd = SerializerUtils.serializedStringToRow(in.readUTF());
@@ -145,8 +147,8 @@ public class OracleSourceSplitSerializer extends SourceSplitSerializer {
         return finishedSplitsInfo;
     }
 
-    private static Map<TableId, TableChanges.TableChange> readTableSchemas(int version, DataInputDeserializer in)
-            throws IOException {
+    private static Map<TableId, TableChanges.TableChange> readTableSchemas(
+            int version, DataInputDeserializer in) throws IOException {
         DocumentReader documentReader = DocumentReader.defaultReader();
         Map<TableId, TableChanges.TableChange> tableSchemas = new HashMap<>();
         final int size = in.readInt();
@@ -168,7 +170,8 @@ public class OracleSourceSplitSerializer extends SourceSplitSerializer {
                     throw new IOException("Unknown version: " + version);
             }
             Document document = documentReader.read(tableChangeStr);
-            TableChanges.TableChange tableChange = FlinkJsonTableChangeSerializer.fromDocument(document, false);
+            TableChanges.TableChange tableChange =
+                    FlinkJsonTableChangeSerializer.fromDocument(document, false);
             tableSchemas.put(tableId, tableChange);
         }
         return tableSchemas;

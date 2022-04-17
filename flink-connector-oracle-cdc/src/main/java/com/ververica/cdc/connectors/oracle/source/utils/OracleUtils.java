@@ -78,22 +78,24 @@ public class OracleUtils {
 
     public static long queryApproximateRowCnt(JdbcConnection jdbc, TableId tableId)
             throws SQLException {
-        final String analyzeTable = String.format("analyze table %s compute statistics for table",tableId.identifier());
+        final String analyzeTable =
+                String.format(
+                        "analyze table %s compute statistics for table", tableId.identifier());
         final String rowCountQuery =
                 String.format(
-                        "select NUM_ROWS from all_tables where TABLE_NAME = '%s'",
-                        tableId.table());
-        return jdbc.execute(analyzeTable).queryAndMap(
-                rowCountQuery,
-                rs -> {
-                    if (!rs.next()) {
-                        throw new SQLException(
-                                String.format(
-                                        "No result returned after running query [%s]",
-                                        rowCountQuery));
-                    }
-                    return rs.getLong(1);
-                });
+                        "select NUM_ROWS from all_tables where TABLE_NAME = '%s'", tableId.table());
+        return jdbc.execute(analyzeTable)
+                .queryAndMap(
+                        rowCountQuery,
+                        rs -> {
+                            if (!rs.next()) {
+                                throw new SQLException(
+                                        String.format(
+                                                "No result returned after running query [%s]",
+                                                rowCountQuery));
+                            }
+                            return rs.getLong(1);
+                        });
     }
 
     public static Object queryMin(
@@ -265,7 +267,7 @@ public class OracleUtils {
         SchemaNameAdjuster schemaNameAdjuster = SchemaNameAdjuster.create();
         OracleConnection oracleConnection =
                 OracleConnectionUtils.createOracleConnection(dbzOracleConfig.getJdbcConfig());
-//        OracleConnectionUtils.createOracleConnection((Configuration) dbzOracleConfig);
+        //        OracleConnectionUtils.createOracleConnection((Configuration) dbzOracleConfig);
         OracleValueConverters oracleValueConverters =
                 new OracleValueConverters(dbzOracleConfig, oracleConnection);
         StreamingAdapter.TableNameCaseSensitivity tableNameCaseSensitivity =

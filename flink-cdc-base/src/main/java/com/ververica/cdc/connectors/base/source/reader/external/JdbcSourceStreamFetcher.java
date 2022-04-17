@@ -177,7 +177,7 @@ public class JdbcSourceStreamFetcher implements Fetcher<SourceRecord, SourceSpli
     }
 
     private boolean hasEnterPureBinlogPhase(TableId tableId, Offset position) {
-        if (Objects.isNull(maxSplitHighWatermarkMap)){
+        if (Objects.isNull(maxSplitHighWatermarkMap)) {
             return true;
         }
 

@@ -18,17 +18,21 @@
 
 package com.ververica.cdc.connectors;
 
-import com.ververica.cdc.connectors.base.source.JdbcIncrementalSource;
-import com.ververica.cdc.connectors.oracle.source.OracleSourceBuilder;
-import com.ververica.cdc.connectors.oracle.utils.OracleTestUtils;
-import com.ververica.cdc.debezium.JsonDebeziumDeserializationSchema;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.runtime.minicluster.RpcServiceSharing;
 import org.apache.flink.runtime.testutils.MiniClusterResourceConfiguration;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.test.util.MiniClusterWithClientResource;
-import org.junit.*;
+
+import com.ververica.cdc.connectors.base.source.JdbcIncrementalSource;
+import com.ververica.cdc.connectors.oracle.source.OracleSourceBuilder;
+import com.ververica.cdc.connectors.oracle.utils.OracleTestUtils;
+import com.ververica.cdc.debezium.JsonDebeziumDeserializationSchema;
+import org.junit.After;
+import org.junit.BeforeClass;
+import org.junit.Ignore;
+import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.OracleContainer;
@@ -47,7 +51,6 @@ public class OracleChangeEventSourceExampleTest {
     private static final OracleContainer oracleContainer =
             OracleTestUtils.ORACLE_CONTAINER.withLogConsumer(new Slf4jLogConsumer(LOG));
 
-
     @BeforeClass
     public static void startContainers() {
         LOG.info("Starting containers...");
@@ -55,7 +58,8 @@ public class OracleChangeEventSourceExampleTest {
         LOG.info("Containers are started.");
 
         Configuration configuration = new Configuration();
-//        configuration.setString("JAVA_HOME", "/Library/Internet Plug-Ins/JavaAppletPlugin.plugin/Contents/Home");
+        //        configuration.setString("JAVA_HOME", "/Library/Internet
+        // Plug-Ins/JavaAppletPlugin.plugin/Contents/Home");
         final MiniClusterWithClientResource miniClusterResource =
                 new MiniClusterWithClientResource(
                         new MiniClusterResourceConfiguration.Builder()
@@ -75,13 +79,16 @@ public class OracleChangeEventSourceExampleTest {
     @Test
     @Ignore("Test ignored because it won't stop and is used for manual test")
     public void testConsumingAllEvents() throws Exception {
-        LOG.info("getOraclePort:{},getUsername:{},getPassword:{}", oracleContainer.getOraclePort(),oracleContainer.getUsername(),oracleContainer.getPassword());
+        LOG.info(
+                "getOraclePort:{},getUsername:{},getPassword:{}",
+                oracleContainer.getOraclePort(),
+                oracleContainer.getUsername(),
+                oracleContainer.getPassword());
         JdbcIncrementalSource<String> oracleChangeEventSource =
                 new OracleSourceBuilder()
                         .hostname(oracleContainer.getHost())
                         .port(oracleContainer.getOraclePort())
                         .databaseList("xe")
-
                         .tableList("DEBEZIUM.PRODUCTS")
                         .username(oracleContainer.getUsername())
                         .password(oracleContainer.getPassword())
@@ -103,5 +110,4 @@ public class OracleChangeEventSourceExampleTest {
 
         env.execute("Print Oracle Snapshot + Binlog");
     }
-
 }

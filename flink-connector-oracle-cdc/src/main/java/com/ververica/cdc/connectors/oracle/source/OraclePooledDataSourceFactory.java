@@ -20,7 +20,6 @@ package com.ververica.cdc.connectors.oracle.source;
 
 import com.ververica.cdc.connectors.base.config.JdbcSourceConfig;
 import com.ververica.cdc.connectors.base.relational.connection.JdbcConnectionPoolFactory;
-import com.ververica.cdc.connectors.oracle.source.config.OracleSourceConfig;
 
 /** A Oracle datasource factory. */
 public class OraclePooledDataSourceFactory extends JdbcConnectionPoolFactory {

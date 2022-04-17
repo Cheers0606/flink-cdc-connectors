@@ -18,6 +18,8 @@
 
 package com.ververica.cdc.connectors.oracle.source.utils;
 
+import org.apache.flink.util.FlinkRuntimeException;
+
 import com.ververica.cdc.connectors.oracle.source.config.OracleSourceConfig;
 import io.debezium.connector.oracle.OracleConnection;
 import io.debezium.connector.oracle.OracleConnectorConfig;
@@ -28,7 +30,6 @@ import io.debezium.relational.TableId;
 import io.debezium.relational.Tables;
 import io.debezium.relational.history.TableChanges;
 import io.debezium.relational.history.TableChanges.TableChange;
-import org.apache.flink.util.FlinkRuntimeException;
 
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -64,8 +65,9 @@ public class OracleSchema {
         }
         return schema;
     }
+
     private TableChange readTableSchema(JdbcConnection jdbc, TableId tableId) {
-        OracleConnection oracleConnection = (OracleConnection)jdbc;
+        OracleConnection oracleConnection = (OracleConnection) jdbc;
         Set<TableId> tableIdSet = new HashSet<>();
         tableIdSet.add(tableId);
 
@@ -75,12 +77,7 @@ public class OracleSchema {
 
         try {
             oracleConnection.readSchemaForCapturedTables(
-                    tables,
-                    tableId.catalog(),
-                    tableId.schema(),
-                    null,
-                    false,
-                    tableIdSet);
+                    tables, tableId.catalog(), tableId.schema(), null, false, tableIdSet);
             Table table = tables.forTable(tableId);
             TableChange tableChange = new TableChange(TableChanges.TableChangeType.CREATE, table);
             tableChangeMap.put(tableId, tableChange);
@@ -96,5 +93,4 @@ public class OracleSchema {
 
         return tableChangeMap.get(tableId);
     }
-
 }

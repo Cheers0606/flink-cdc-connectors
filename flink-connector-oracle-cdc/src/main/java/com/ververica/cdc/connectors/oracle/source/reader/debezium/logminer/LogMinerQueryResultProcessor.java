@@ -378,9 +378,7 @@ class LogMinerQueryResultProcessor {
                     {
                         LOGGER.trace("DML, {}, sql {}", logMessage, redoSql);
                         if (redoSql != null) {
-                            final TableId tableId =
-                                    RowMapper.getTableId(
-                                            null, resultSet);
+                            final TableId tableId = RowMapper.getTableId(null, resultSet);
                             dmlCounter++;
                             switch (operationCode) {
                                 case RowMapper.INSERT:

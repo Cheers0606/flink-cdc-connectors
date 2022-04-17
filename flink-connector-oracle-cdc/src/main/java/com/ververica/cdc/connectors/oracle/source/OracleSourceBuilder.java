@@ -18,13 +18,14 @@
 
 package com.ververica.cdc.connectors.oracle.source;
 
+import org.apache.flink.annotation.Experimental;
+
 import com.ververica.cdc.connectors.base.options.StartupOptions;
 import com.ververica.cdc.connectors.base.source.JdbcIncrementalSource;
 import com.ververica.cdc.connectors.oracle.source.config.OracleSourceConfigFactory;
 import com.ververica.cdc.connectors.oracle.source.meta.offset.RedoLogOffsetFactory;
 import com.ververica.cdc.connectors.oracle.source.meta.split.OracleSourceSplitSerializer;
 import com.ververica.cdc.debezium.DebeziumDeserializationSchema;
-import org.apache.flink.annotation.Experimental;
 
 import java.time.Duration;
 import java.util.Properties;
@@ -207,7 +208,12 @@ public class OracleSourceBuilder<T> {
                 DebeziumDeserializationSchema<T> deserializationSchema,
                 RedoLogOffsetFactory offsetFactory,
                 OracleDialect dataSourceDialect) {
-            super(configFactory, deserializationSchema, offsetFactory, dataSourceDialect, new OracleSourceSplitSerializer(offsetFactory));
+            super(
+                    configFactory,
+                    deserializationSchema,
+                    offsetFactory,
+                    dataSourceDialect,
+                    new OracleSourceSplitSerializer(offsetFactory));
         }
     }
 }

@@ -18,9 +18,10 @@
 
 package com.ververica.cdc.connectors.oracle.source.meta.split;
 
+import org.apache.flink.api.connector.source.SourceSplit;
+
 import io.debezium.relational.TableId;
 import io.debezium.relational.history.TableChanges;
-import org.apache.flink.api.connector.source.SourceSplit;
 
 import java.util.Map;
 import java.util.Objects;

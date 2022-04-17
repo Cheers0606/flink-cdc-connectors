@@ -15,13 +15,10 @@ import org.testcontainers.lifecycle.Startables;
 import java.sql.SQLException;
 import java.util.stream.Stream;
 
-/**
- * @author Enoch on 2022/4/18
- */
+/** OracleConnectionUtilsTest. */
 public class OracleConnectionUtilsTest {
 
-    private static final Logger LOG =
-            LoggerFactory.getLogger(OracleConnectionUtilsTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(OracleConnectionUtilsTest.class);
     private static final OracleContainer oracleContainer =
             OracleTestUtils.ORACLE_CONTAINER.withLogConsumer(new Slf4jLogConsumer(LOG));
 
@@ -31,23 +28,27 @@ public class OracleConnectionUtilsTest {
         Startables.deepStart(Stream.of(oracleContainer)).join();
         LOG.info("Containers are started.");
     }
+
     @Test
     public void createOracleConnection() throws SQLException {
-        Configuration configuration = Configuration.create()
-                .with("connector.class", OracleConnector.class.getCanonicalName())
-                .with("database.port",oracleContainer.getOraclePort())
-                .with("database.history.skip.unparseable.ddl","true")
-                .with("table.include.list","debezium.PRODUCTS")
-                .with("schema.include.list","xe")
-                .with("database.user",oracleContainer.getUsername())
-                .with("database.hostname",oracleContainer.getHost())
-                .with("database.password",oracleContainer.getPassword())
-                .with("database.server.name","oracle_logminer")
-                .with("database.dbname","xe")
-                .with("driver.class.name",oracleContainer.getDriverClassName())
-//                .with("url",oracleContainer.getJdbcUrl())
-                .build();
-        OracleConnection oracleConnection = OracleConnectionUtils.createOracleConnection(configuration);
-        System.out.println("oracleConnection.getCurrentScn() = " + oracleConnection.getCurrentScn());
+        Configuration configuration =
+                Configuration.create()
+                        .with("connector.class", OracleConnector.class.getCanonicalName())
+                        .with("database.port", oracleContainer.getOraclePort())
+                        .with("database.history.skip.unparseable.ddl", "true")
+                        .with("table.include.list", "debezium.PRODUCTS")
+                        .with("schema.include.list", "xe")
+                        .with("database.user", oracleContainer.getUsername())
+                        .with("database.hostname", oracleContainer.getHost())
+                        .with("database.password", oracleContainer.getPassword())
+                        .with("database.server.name", "oracle_logminer")
+                        .with("database.dbname", "xe")
+                        .with("driver.class.name", oracleContainer.getDriverClassName())
+                        //                .with("url",oracleContainer.getJdbcUrl())
+                        .build();
+        OracleConnection oracleConnection =
+                OracleConnectionUtils.createOracleConnection(configuration);
+        System.out.println(
+                "oracleConnection.getCurrentScn() = " + oracleConnection.getCurrentScn());
     }
 }

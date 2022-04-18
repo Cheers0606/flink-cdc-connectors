@@ -18,6 +18,8 @@
 
 package com.ververica.cdc.connectors.oracle.source;
 
+import com.ververica.cdc.connectors.base.relational.connection.JdbcConnectionFactory;
+import io.debezium.config.Field;
 import org.apache.flink.annotation.Experimental;
 import org.apache.flink.util.FlinkRuntimeException;
 
@@ -80,11 +82,21 @@ public class OracleDialect implements JdbcDataSourceDialect {
     @Override
     public boolean isDataCollectionIdCaseSensitive(JdbcSourceConfig sourceConfig) {
         try (JdbcConnection jdbcConnection = openJdbcConnection(sourceConfig)) {
-            OracleConnection oracleConnection = (OracleConnection) jdbcConnection;
-            return oracleConnection.getOracleVersion().getMajor() == 11;
+            // TODO Caused by: java.lang.ClassCastException: io.debezium.jdbc.JdbcConnection cannot be cast to io.debezium.connector.oracle.OracleConnection
+//            OracleConnection oracleConnection = (OracleConnection) jdbcConnection;
+//            return oracleConnection.getOracleVersion().getMajor() == 11;
+            return true;
         } catch (SQLException e) {
             throw new FlinkRuntimeException("Error reading oracle variables: " + e.getMessage(), e);
         }
+    }
+
+    @Override
+    public JdbcConnection openJdbcConnection(JdbcSourceConfig sourceConfig) {
+//        return new JdbcConnection(sourceConfig.getDbzConfiguration(),
+//                JdbcConnection.patternBasedFactory(OracleConnection.connectionString(sourceConfig.getDbzConnectorConfig().getJdbcConfig()), new Field[0]));
+//        return OracleConnectionUtils.createOracleConnection(sourceConfig.getDbzConfiguration());
+        return JdbcDataSourceDialect.super.openJdbcConnection(sourceConfig);
     }
 
     @Override

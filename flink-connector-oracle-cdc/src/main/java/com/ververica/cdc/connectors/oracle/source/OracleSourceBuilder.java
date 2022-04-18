@@ -50,6 +50,11 @@ public class OracleSourceBuilder<T> {
         return this;
     }
 
+    public OracleSourceBuilder<T> schema(String schema) {
+        this.configFactory.schema(schema);
+        return this;
+    }
+
     /** Integer port number of the Oracle database server. */
     public OracleSourceBuilder<T> port(int port) {
         this.configFactory.port(port);

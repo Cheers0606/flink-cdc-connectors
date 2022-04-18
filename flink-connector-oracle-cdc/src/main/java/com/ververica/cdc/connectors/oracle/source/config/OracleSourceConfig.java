@@ -35,6 +35,7 @@ import java.util.Properties;
 public class OracleSourceConfig extends JdbcSourceConfig {
 
     private static final long serialVersionUID = 1L;
+    private String schema;
 
     private transient OracleConnectorConfig dbzOracleConfig;
 
@@ -58,7 +59,8 @@ public class OracleSourceConfig extends JdbcSourceConfig {
             String serverTimeZone,
             Duration connectTimeout,
             int connectMaxRetries,
-            int connectionPoolSize) {
+            int connectionPoolSize,
+            String schema) {
         super(
                 startupOptions,
                 databaseList,
@@ -80,6 +82,11 @@ public class OracleSourceConfig extends JdbcSourceConfig {
                 connectTimeout,
                 connectMaxRetries,
                 connectionPoolSize);
+        this.schema = schema;
+    }
+
+    public String getSchema() {
+        return schema;
     }
 
     @Override

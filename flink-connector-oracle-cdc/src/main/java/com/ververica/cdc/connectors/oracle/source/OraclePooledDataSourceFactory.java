@@ -20,6 +20,7 @@ package com.ververica.cdc.connectors.oracle.source;
 
 import com.ververica.cdc.connectors.base.config.JdbcSourceConfig;
 import com.ververica.cdc.connectors.base.relational.connection.JdbcConnectionPoolFactory;
+import com.ververica.cdc.connectors.oracle.source.config.OracleSourceConfig;
 
 /** A Oracle datasource factory. */
 public class OraclePooledDataSourceFactory extends JdbcConnectionPoolFactory {
@@ -30,8 +31,8 @@ public class OraclePooledDataSourceFactory extends JdbcConnectionPoolFactory {
     public String getJdbcUrl(JdbcSourceConfig sourceConfig) {
         String hostName = sourceConfig.getHostname();
         int port = sourceConfig.getPort();
-        String dbName = sourceConfig.getDatabaseList().get(0);
+        String schema = ((OracleSourceConfig) sourceConfig).getSchema();
 
-        return String.format(JDBC_URL_PATTERN, hostName, port, dbName);
+        return String.format(JDBC_URL_PATTERN, hostName, port, schema);
     }
 }

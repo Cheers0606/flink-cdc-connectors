@@ -31,8 +31,7 @@ public class OraclePooledDataSourceFactory extends JdbcConnectionPoolFactory {
     public String getJdbcUrl(JdbcSourceConfig sourceConfig) {
         String hostName = sourceConfig.getHostname();
         int port = sourceConfig.getPort();
-        String schema = ((OracleSourceConfig) sourceConfig).getSchema();
-
+        String schema = sourceConfig.getDatabaseList().get(0);
         return String.format(JDBC_URL_PATTERN, hostName, port, schema);
     }
 }

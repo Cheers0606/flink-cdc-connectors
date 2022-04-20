@@ -55,7 +55,7 @@ public class OracleChangeEventSourceExampleTest {
         LOG.info("Containers are started.");
 
         Configuration configuration = new Configuration();
-        configuration.setString("JAVA_HOME", "/Library/Internet Plug-Ins/JavaAppletPlugin.plugin/Contents/Home");
+//        configuration.setString("JAVA_HOME", "/Library/Internet Plug-Ins/JavaAppletPlugin.plugin/Contents/Home");
         final MiniClusterWithClientResource miniClusterResource =
                 new MiniClusterWithClientResource(
                         new MiniClusterResourceConfiguration.Builder()
@@ -79,8 +79,7 @@ public class OracleChangeEventSourceExampleTest {
                 new OracleSourceBuilder()
                         .hostname(oracleContainer.getHost())
                         .port(oracleContainer.getOraclePort())
-                        .schema("xe")
-                        .databaseList("debezium")
+                        .databaseList("xe")
                         .tableList("debezium.PRODUCTS")
                         .username(oracleContainer.getUsername())
                         .password(oracleContainer.getPassword())

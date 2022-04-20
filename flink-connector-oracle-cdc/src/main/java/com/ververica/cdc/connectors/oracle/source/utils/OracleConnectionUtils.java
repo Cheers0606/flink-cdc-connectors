@@ -34,6 +34,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import static io.debezium.config.CommonConnectorConfig.DATABASE_CONFIG_PREFIX;
+
 /** Oracle connection Utilities. */
 public class OracleConnectionUtils {
 
@@ -41,7 +43,7 @@ public class OracleConnectionUtils {
 
     /** Creates a new {@link OracleConnection}, but not open the connection. */
     public static OracleConnection createOracleConnection(Configuration dbzConfiguration) {
-        return new OracleConnection(dbzConfiguration, OracleConnectionUtils.class::getClassLoader);
+        return new OracleConnection(dbzConfiguration.subset(DATABASE_CONFIG_PREFIX, true), OracleConnectionUtils.class::getClassLoader);
     }
 
     /** Fetch current redoLog offsets in Oracle Server. */

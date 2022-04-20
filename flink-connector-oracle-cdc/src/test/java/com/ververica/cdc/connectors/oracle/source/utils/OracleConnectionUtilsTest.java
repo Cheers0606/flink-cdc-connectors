@@ -15,9 +15,6 @@ import org.testcontainers.lifecycle.Startables;
 import java.sql.SQLException;
 import java.util.stream.Stream;
 
-import static com.ververica.cdc.connectors.oracle.source.OraclePooledDataSourceFactory.JDBC_URL_PATTERN;
-import static org.junit.Assert.*;
-
 /**
  * @author Enoch on 2022/4/18
  */
@@ -41,15 +38,14 @@ public class OracleConnectionUtilsTest {
                 .with("database.port",oracleContainer.getOraclePort())
                 .with("database.history.skip.unparseable.ddl","true")
                 .with("table.include.list","debezium.PRODUCTS")
-                .with("schema.include.list","debezium")
+                .with("schema.include.list","xe")
                 .with("database.user",oracleContainer.getUsername())
                 .with("database.hostname",oracleContainer.getHost())
                 .with("database.password",oracleContainer.getPassword())
                 .with("database.server.name","oracle_logminer")
-                .with("database.dbname","debezium")
+                .with("database.dbname","xe")
                 .with("driver.class.name",oracleContainer.getDriverClassName())
-                .with("url",oracleContainer.getJdbcUrl())
-//                .with("url",String.format("%s:%s:%s", "192.168.33.3", "32928", "xe"))
+//                .with("url",oracleContainer.getJdbcUrl())
                 .build();
         OracleConnection oracleConnection = OracleConnectionUtils.createOracleConnection(configuration);
         System.out.println("oracleConnection.getCurrentScn() = " + oracleConnection.getCurrentScn());

@@ -82,7 +82,7 @@ public class OracleDialect implements JdbcDataSourceDialect {
     @Override
     public boolean isDataCollectionIdCaseSensitive(JdbcSourceConfig sourceConfig) {
         try (JdbcConnection jdbcConnection = openJdbcConnection(sourceConfig)) {
-            // TODO Caused by: java.lang.ClassCastException: io.debezium.jdbc.JdbcConnection cannot be cast to io.debezium.connector.oracle.OracleConnection
+            // TODO getOracleVersion
 //            OracleConnection oracleConnection = (OracleConnection) jdbcConnection;
 //            return oracleConnection.getOracleVersion().getMajor() == 11;
             return true;
@@ -93,10 +93,8 @@ public class OracleDialect implements JdbcDataSourceDialect {
 
     @Override
     public JdbcConnection openJdbcConnection(JdbcSourceConfig sourceConfig) {
-//        return new JdbcConnection(sourceConfig.getDbzConfiguration(),
-//                JdbcConnection.patternBasedFactory(OracleConnection.connectionString(sourceConfig.getDbzConnectorConfig().getJdbcConfig()), new Field[0]));
-//        return OracleConnectionUtils.createOracleConnection(sourceConfig.getDbzConfiguration());
-        return JdbcDataSourceDialect.super.openJdbcConnection(sourceConfig);
+        return OracleConnectionUtils.createOracleConnection(sourceConfig.getDbzConnectorConfig().getJdbcConfig());
+//        return JdbcDataSourceDialect.super.openJdbcConnection(sourceConfig);
     }
 
     @Override

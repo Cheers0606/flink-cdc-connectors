@@ -21,7 +21,6 @@ package com.ververica.cdc.connectors.oracle.source.config;
 import com.ververica.cdc.connectors.base.config.JdbcSourceConfigFactory;
 import io.debezium.config.Configuration;
 import io.debezium.connector.oracle.OracleConnector;
-import io.debezium.connector.oracle.OracleConnectorConfig;
 
 import java.util.Properties;
 
@@ -32,11 +31,6 @@ public class OracleSourceConfigFactory extends JdbcSourceConfigFactory {
 
     private static final String DATABASE_SERVER_NAME = "oracle_logminer";
     private static final String DRIVER_ClASS_NAME = "oracle.jdbc.OracleDriver";
-    protected String schema;
-    public JdbcSourceConfigFactory schema(String schema) {
-        this.schema = schema;
-        return this;
-    }
     /** Creates a new {@link OracleSourceConfig} for the given subtask {@code subtaskId}. */
     public OracleSourceConfig create(int subtaskId) {
         Properties props = new Properties();
@@ -90,7 +84,6 @@ public class OracleSourceConfigFactory extends JdbcSourceConfigFactory {
                 serverTimeZone,
                 connectTimeout,
                 connectMaxRetries,
-                connectionPoolSize,
-                schema);
+                connectionPoolSize);
     }
 }

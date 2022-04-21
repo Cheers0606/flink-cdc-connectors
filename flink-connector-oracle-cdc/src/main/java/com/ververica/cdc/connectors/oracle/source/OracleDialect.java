@@ -18,11 +18,6 @@
 
 package com.ververica.cdc.connectors.oracle.source;
 
-import com.ververica.cdc.connectors.base.relational.connection.JdbcConnectionFactory;
-import io.debezium.config.Field;
-import org.apache.flink.annotation.Experimental;
-import org.apache.flink.util.FlinkRuntimeException;
-
 import com.ververica.cdc.connectors.base.config.JdbcSourceConfig;
 import com.ververica.cdc.connectors.base.dialect.JdbcDataSourceDialect;
 import com.ververica.cdc.connectors.base.relational.connection.JdbcConnectionPoolFactory;
@@ -42,6 +37,8 @@ import io.debezium.connector.oracle.OracleConnection;
 import io.debezium.jdbc.JdbcConnection;
 import io.debezium.relational.TableId;
 import io.debezium.relational.history.TableChanges.TableChange;
+import org.apache.flink.annotation.Experimental;
+import org.apache.flink.util.FlinkRuntimeException;
 
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -82,10 +79,8 @@ public class OracleDialect implements JdbcDataSourceDialect {
     @Override
     public boolean isDataCollectionIdCaseSensitive(JdbcSourceConfig sourceConfig) {
         try (JdbcConnection jdbcConnection = openJdbcConnection(sourceConfig)) {
-            // TODO getOracleVersion
-//            OracleConnection oracleConnection = (OracleConnection) jdbcConnection;
-//            return oracleConnection.getOracleVersion().getMajor() == 11;
-            return true;
+            OracleConnection oracleConnection = (OracleConnection) jdbcConnection;
+            return oracleConnection.getOracleVersion().getMajor() == 11;
         } catch (SQLException e) {
             throw new FlinkRuntimeException("Error reading oracle variables: " + e.getMessage(), e);
         }

@@ -78,12 +78,12 @@ public class OracleUtils {
 
     public static long queryApproximateRowCnt(JdbcConnection jdbc, TableId tableId)
             throws SQLException {
-
+        final String analyzeTable = String.format("analyze table %s compute statistics for table",tableId.identifier());
         final String rowCountQuery =
                 String.format(
-                        "select NUM_ROWS from user_tables where TABLE_NAME = '%s';",
+                        "select NUM_ROWS from all_tables where TABLE_NAME = '%s'",
                         tableId.table());
-        return jdbc.queryAndMap(
+        return jdbc.execute(analyzeTable).queryAndMap(
                 rowCountQuery,
                 rs -> {
                     if (!rs.next()) {
@@ -428,6 +428,6 @@ public class OracleUtils {
     }
 
     private static String quotedTableIdString(TableId tableId) {
-        return tableId.toQuotedString('`');
+        return tableId.toQuotedString('"');
     }
 }

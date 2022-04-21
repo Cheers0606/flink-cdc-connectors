@@ -90,11 +90,11 @@ public class RedoLogOffset extends Offset {
         }
         if (Objects.isNull(this.offset.get(REDO_LOG_SCN_OFFSET_KEY))
                 && !Objects.isNull(that.getOffset().get(REDO_LOG_SCN_OFFSET_KEY))) {
-            return 1;
+            return -1;
         }
         if (!Objects.isNull(this.offset.get(REDO_LOG_SCN_OFFSET_KEY))
                 && Objects.isNull(that.getOffset().get(REDO_LOG_SCN_OFFSET_KEY))) {
-            return -1;
+            return 1;
         }
 
         Long thisScn = Long.parseLong(this.offset.get(REDO_LOG_SCN_OFFSET_KEY));

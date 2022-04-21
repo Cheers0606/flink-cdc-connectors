@@ -80,7 +80,8 @@ public class OracleChangeEventSourceExampleTest {
                         .hostname(oracleContainer.getHost())
                         .port(oracleContainer.getOraclePort())
                         .databaseList("xe")
-                        .tableList("debezium.PRODUCTS")
+
+                        .tableList("DEBEZIUM.PRODUCTS")
                         .username(oracleContainer.getUsername())
                         .password(oracleContainer.getPassword())
                         .deserializer(new JsonDebeziumDeserializationSchema())

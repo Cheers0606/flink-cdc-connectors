@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -43,7 +44,8 @@ public class OracleConnectionUtils {
 
     /** Creates a new {@link OracleConnection}, but not open the connection. */
     public static OracleConnection createOracleConnection(Configuration dbzConfiguration) {
-        return new OracleConnection(dbzConfiguration.subset(DATABASE_CONFIG_PREFIX, true), OracleConnectionUtils.class::getClassLoader);
+        Configuration configuration = dbzConfiguration.subset(DATABASE_CONFIG_PREFIX, true);
+        return new OracleConnection(configuration.isEmpty() ? dbzConfiguration : configuration, OracleConnectionUtils.class::getClassLoader);
     }
 
     /** Fetch current redoLog offsets in Oracle Server. */
@@ -77,13 +79,30 @@ public class OracleConnectionUtils {
             throws SQLException {
         final List<TableId> capturedTableIds = new ArrayList<>();
 
-        Set<TableId> tableIdSet = jdbcConnection.readAllTableNames(null);
+        Set<TableId> tableIdSet = new HashSet<>();
+        String queryTablesSql = "SELECT OWNER ,TABLE_NAME,TABLESPACE_NAME FROM ALL_TABLES \n" +
+                "WHERE TABLESPACE_NAME IS NOT NULL AND TABLESPACE_NAME NOT IN ('SYSTEM','SYSAUX')";
+        try {
+            jdbcConnection.query(
+                    queryTablesSql,
+                    rs -> {
+                        while (rs.next()) {
+                            String schemaName = rs.getString(1);
+                            String tableName = rs.getString(2);
+                            TableId tableId = new TableId(null, schemaName, tableName);
+                            tableIdSet.add(tableId);
+                        }
+                    });
+        }catch (SQLException e){
+            LOG.warn(" SQL execute error, sql:{}", queryTablesSql, e);
+        }
+
         for (TableId tableId : tableIdSet) {
             if (tableFilters.dataCollectionFilter().isIncluded(tableId)) {
                 capturedTableIds.add(tableId);
                 LOG.info("\t including '{}' for further processing", tableId);
             } else {
-                LOG.info("\t '{}' is filtered out of capturing", tableId);
+                LOG.debug("\t '{}' is filtered out of capturing", tableId);
             }
         }
 

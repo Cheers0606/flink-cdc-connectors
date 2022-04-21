@@ -18,9 +18,8 @@
 
 package com.ververica.cdc.connectors.oracle.source.utils;
 
-import org.apache.flink.util.FlinkRuntimeException;
-
 import com.ververica.cdc.connectors.oracle.source.config.OracleSourceConfig;
+import io.debezium.connector.oracle.OracleConnection;
 import io.debezium.connector.oracle.OracleConnectorConfig;
 import io.debezium.connector.oracle.OracleDatabaseSchema;
 import io.debezium.jdbc.JdbcConnection;
@@ -29,10 +28,13 @@ import io.debezium.relational.TableId;
 import io.debezium.relational.Tables;
 import io.debezium.relational.history.TableChanges;
 import io.debezium.relational.history.TableChanges.TableChange;
+import org.apache.flink.util.FlinkRuntimeException;
 
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import static com.ververica.cdc.connectors.oracle.source.utils.OracleUtils.createOracleDatabaseSchema;
 
@@ -62,15 +64,23 @@ public class OracleSchema {
         }
         return schema;
     }
-
     private TableChange readTableSchema(JdbcConnection jdbc, TableId tableId) {
-        final Map<TableId, TableChange> tableChangeMap = new HashMap<>();
+        OracleConnection oracleConnection = (OracleConnection)jdbc;
+        Set<TableId> tableIdSet = new HashSet<>();
+        tableIdSet.add(tableId);
 
+        final Map<TableId, TableChange> tableChangeMap = new HashMap<>();
         Tables tables = new Tables();
         tables.overwriteTable(tables.editOrCreateTable(tableId).create());
 
         try {
-            jdbc.readSchema(tables, tableId.catalog(), tableId.schema(), null, null, false);
+            oracleConnection.readSchemaForCapturedTables(
+                    tables,
+                    tableId.catalog(),
+                    tableId.schema(),
+                    null,
+                    false,
+                    tableIdSet);
             Table table = tables.forTable(tableId);
             TableChange tableChange = new TableChange(TableChanges.TableChangeType.CREATE, table);
             tableChangeMap.put(tableId, tableChange);
@@ -86,4 +96,5 @@ public class OracleSchema {
 
         return tableChangeMap.get(tableId);
     }
+
 }

@@ -127,7 +127,7 @@ public abstract class SourceSplitSerializer
 
         int splitKind = in.readInt();
         if (splitKind == SNAPSHOT_SPLIT_FLAG) {
-            TableId tableId = TableId.parse(in.readUTF());
+            TableId tableId = TableId.parse(in.readUTF(), false);
             String splitId = in.readUTF();
             RowType splitKeyType = (RowType) LogicalTypeParser.parse(in.readUTF());
             Object[] splitBoundaryStart = SerializerUtils.serializedStringToRow(in.readUTF());
@@ -191,7 +191,7 @@ public abstract class SourceSplitSerializer
         Map<TableId, TableChange> tableSchemas = new HashMap<>();
         final int size = in.readInt();
         for (int i = 0; i < size; i++) {
-            TableId tableId = TableId.parse(in.readUTF());
+            TableId tableId = TableId.parse(in.readUTF(),false);
             final String tableChangeStr;
             switch (version) {
                 case 1:
@@ -208,7 +208,7 @@ public abstract class SourceSplitSerializer
                     throw new IOException("Unknown version: " + version);
             }
             Document document = documentReader.read(tableChangeStr);
-            TableChange tableChange = FlinkJsonTableChangeSerializer.fromDocument(document, true);
+            TableChange tableChange = FlinkJsonTableChangeSerializer.fromDocument(document, false);
             tableSchemas.put(tableId, tableChange);
         }
         return tableSchemas;

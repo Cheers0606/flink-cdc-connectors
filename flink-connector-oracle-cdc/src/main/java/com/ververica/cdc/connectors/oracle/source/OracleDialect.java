@@ -88,6 +88,12 @@ public class OracleDialect implements JdbcDataSourceDialect {
     }
 
     @Override
+    public JdbcConnection openJdbcConnection(JdbcSourceConfig sourceConfig) {
+        return OracleConnectionUtils.createOracleConnection(sourceConfig.getDbzConnectorConfig().getJdbcConfig());
+//        return JdbcDataSourceDialect.super.openJdbcConnection(sourceConfig);
+    }
+
+    @Override
     public ChunkSplitter<TableId> createChunkSplitter(JdbcSourceConfig sourceConfig) {
         return new OracleChunkSplitter(sourceConfig, this);
     }

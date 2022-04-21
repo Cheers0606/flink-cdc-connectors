@@ -23,6 +23,8 @@ import com.ververica.cdc.connectors.base.source.meta.split.SourceSplitBase;
 import com.ververica.cdc.connectors.base.source.meta.split.StreamSplit;
 import com.ververica.cdc.connectors.base.source.reader.external.FetchTask;
 import com.ververica.cdc.connectors.oracle.source.meta.offset.RedoLogOffset;
+import com.ververica.cdc.connectors.oracle.source.reader.debezium.logminer.OracleLogMinerStreamingChangeEventSource;
+import io.debezium.DebeziumException;
 import io.debezium.config.Configuration;
 import io.debezium.connector.oracle.OracleConnection;
 import io.debezium.connector.oracle.OracleConnectorConfig;
@@ -87,7 +89,8 @@ public class OracleStreamFetchTask implements FetchTask<SourceSplitBase> {
      * A wrapped task to read all binlog for table and also supports read bounded (from lowWatermark
      * to highWatermark) binlog.
      */
-    public static class OracleRedoLogSplitReadTask extends LogMinerStreamingChangeEventSource {
+    public static class OracleRedoLogSplitReadTask
+            extends OracleLogMinerStreamingChangeEventSource {
 
         private static final Logger LOG = LoggerFactory.getLogger(OracleRedoLogSplitReadTask.class);
         private final StreamSplit redoLogSplit;
@@ -127,15 +130,39 @@ public class OracleStreamFetchTask implements FetchTask<SourceSplitBase> {
             super.execute(context, offsetContext);
         }
 
-        // TODO: how to stop for fetch binlog for snapshot split? we can reimplements
-        // StreamingChangeEventSource that copy from LogMinerStreamingChangeEventSource and add
-        // event handle method
+        @Override
+        public void afterHandleScn(OracleOffsetContext offsetContext) {
+            super.afterHandleScn(offsetContext);
+            // check do we need to stop for fetch binlog for snapshot split.
+            if (isBoundedRead()) {
+                final RedoLogOffset currentRedoLogOffset =
+                        getCurrentRedoLogOffset(offsetContext.getOffset());
+                // reach the high watermark, the binlog fetcher should be finished
+                if (currentRedoLogOffset.isAtOrAfter(redoLogSplit.getEndingOffset())) {
+                    // send binlog end event
+                    try {
+                        dispatcher.dispatchWatermarkEvent(
+                                offsetContext.getPartition(),
+                                redoLogSplit,
+                                currentRedoLogOffset,
+                                JdbcSourceEventDispatcher.WatermarkKind.BINLOG_END);
+                    } catch (InterruptedException e) {
+                        LOG.error("Send signal event error.", e);
+                        errorHandler.setProducerThrowable(
+                                new DebeziumException("Error processing binlog signal event", e));
+                    }
+                    // tell fetcher the binlog task finished
+                    ((OracleScanFetchTask.SnapshotBinlogSplitChangeEventSourceContext) context)
+                            .finished();
+                }
+            }
+        }
 
         private boolean isBoundedRead() {
             return !NO_STOPPING_OFFSET.equals(redoLogSplit.getEndingOffset());
         }
 
-        public static RedoLogOffset getBinlogPosition(Map<String, ?> offset) {
+        public static RedoLogOffset getCurrentRedoLogOffset(Map<String, ?> offset) {
             Map<String, String> offsetStrMap = new HashMap<>();
             for (Map.Entry<String, ?> entry : offset.entrySet()) {
                 offsetStrMap.put(

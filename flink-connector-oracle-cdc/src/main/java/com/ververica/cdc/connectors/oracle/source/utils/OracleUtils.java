@@ -23,9 +23,12 @@ import org.apache.flink.table.types.logical.RowType;
 
 import com.ververica.cdc.connectors.oracle.source.meta.offset.RedoLogOffset;
 import io.debezium.config.Configuration;
+import io.debezium.connector.oracle.OracleConnection;
 import io.debezium.connector.oracle.OracleConnectorConfig;
 import io.debezium.connector.oracle.OracleDatabaseSchema;
 import io.debezium.connector.oracle.OracleTopicSelector;
+import io.debezium.connector.oracle.OracleValueConverters;
+import io.debezium.connector.oracle.StreamingAdapter;
 import io.debezium.jdbc.JdbcConnection;
 import io.debezium.relational.Column;
 import io.debezium.relational.Table;
@@ -75,12 +78,12 @@ public class OracleUtils {
 
     public static long queryApproximateRowCnt(JdbcConnection jdbc, TableId tableId)
             throws SQLException {
-
+        final String analyzeTable = String.format("analyze table %s compute statistics for table",tableId.identifier());
         final String rowCountQuery =
                 String.format(
-                        "select NUM_ROWS from user_tables where TABLE_NAME = '%s';",
+                        "select NUM_ROWS from all_tables where TABLE_NAME = '%s'",
                         tableId.table());
-        return jdbc.queryAndMap(
+        return jdbc.execute(analyzeTable).queryAndMap(
                 rowCountQuery,
                 rs -> {
                     if (!rs.next()) {
@@ -260,11 +263,19 @@ public class OracleUtils {
             OracleConnectorConfig dbzOracleConfig) {
         TopicSelector<TableId> topicSelector = OracleTopicSelector.defaultSelector(dbzOracleConfig);
         SchemaNameAdjuster schemaNameAdjuster = SchemaNameAdjuster.create();
+        OracleConnection oracleConnection =
+                OracleConnectionUtils.createOracleConnection(dbzOracleConfig.getJdbcConfig());
+//        OracleConnectionUtils.createOracleConnection((Configuration) dbzOracleConfig);
+        OracleValueConverters oracleValueConverters =
+                new OracleValueConverters(dbzOracleConfig, oracleConnection);
+        StreamingAdapter.TableNameCaseSensitivity tableNameCaseSensitivity =
+                dbzOracleConfig.getAdapter().getTableNameCaseSensitivity(oracleConnection);
         return new OracleDatabaseSchema(
                 dbzOracleConfig,
+                oracleValueConverters,
                 schemaNameAdjuster,
                 topicSelector,
-                OracleConnectionUtils.createOracleConnection((Configuration) dbzOracleConfig));
+                tableNameCaseSensitivity);
     }
 
     /** Creates a new {@link OracleDatabaseSchema} to monitor the latest oracle database schemas. */
@@ -272,11 +283,20 @@ public class OracleUtils {
             OracleConnectorConfig dbzOracleConfig, boolean tableIdCaseInsensitive) {
         TopicSelector<TableId> topicSelector = OracleTopicSelector.defaultSelector(dbzOracleConfig);
         SchemaNameAdjuster schemaNameAdjuster = SchemaNameAdjuster.create();
+        OracleConnection oracleConnection =
+                OracleConnectionUtils.createOracleConnection((Configuration) dbzOracleConfig);
+        OracleValueConverters oracleValueConverters =
+                new OracleValueConverters(dbzOracleConfig, oracleConnection);
+        StreamingAdapter.TableNameCaseSensitivity tableNameCaseSensitivity =
+                tableIdCaseInsensitive
+                        ? StreamingAdapter.TableNameCaseSensitivity.SENSITIVE
+                        : StreamingAdapter.TableNameCaseSensitivity.INSENSITIVE;
         return new OracleDatabaseSchema(
                 dbzOracleConfig,
+                oracleValueConverters,
                 schemaNameAdjuster,
                 topicSelector,
-                OracleConnectionUtils.createOracleConnection((Configuration) dbzOracleConfig));
+                tableNameCaseSensitivity);
     }
 
     public static RedoLogOffset getRedoLogPosition(SourceRecord dataRecord) {
@@ -408,6 +428,6 @@ public class OracleUtils {
     }
 
     private static String quotedTableIdString(TableId tableId) {
-        return tableId.toQuotedString('`');
+        return tableId.toQuotedString('"');
     }
 }

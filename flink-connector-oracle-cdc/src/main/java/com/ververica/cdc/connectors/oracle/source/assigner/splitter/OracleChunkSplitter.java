@@ -71,6 +71,7 @@ public class OracleChunkSplitter implements JdbcSourceChunkSplitter {
 
             LOG.info("Start splitting table {} into chunks...", tableId);
             long start = System.currentTimeMillis();
+
             Table table = dialect.queryTableSchema(jdbc, tableId).getTable();
             Column splitColumn = getSplitColumn(table);
             final List<ChunkRange> chunks;

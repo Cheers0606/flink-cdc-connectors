@@ -37,6 +37,9 @@ import java.util.Set;
 
 import static io.debezium.config.CommonConnectorConfig.DATABASE_CONFIG_PREFIX;
 
+import java.util.List;
+import java.util.Set;
+
 /** Oracle connection Utilities. */
 public class OracleConnectionUtils {
 

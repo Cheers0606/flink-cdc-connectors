@@ -18,6 +18,9 @@
 
 package com.ververica.cdc.connectors.oracle.source;
 
+import org.apache.flink.annotation.Experimental;
+import org.apache.flink.util.FlinkRuntimeException;
+
 import com.ververica.cdc.connectors.base.config.JdbcSourceConfig;
 import com.ververica.cdc.connectors.base.dialect.JdbcDataSourceDialect;
 import com.ververica.cdc.connectors.base.relational.connection.JdbcConnectionPoolFactory;
@@ -37,8 +40,6 @@ import io.debezium.connector.oracle.OracleConnection;
 import io.debezium.jdbc.JdbcConnection;
 import io.debezium.relational.TableId;
 import io.debezium.relational.history.TableChanges.TableChange;
-import org.apache.flink.annotation.Experimental;
-import org.apache.flink.util.FlinkRuntimeException;
 
 import java.sql.SQLException;
 import java.util.HashMap;

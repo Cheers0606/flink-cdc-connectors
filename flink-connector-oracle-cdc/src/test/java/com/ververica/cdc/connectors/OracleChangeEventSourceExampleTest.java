@@ -75,6 +75,7 @@ public class OracleChangeEventSourceExampleTest {
     @Test
     @Ignore("Test ignored because it won't stop and is used for manual test")
     public void testConsumingAllEvents() throws Exception {
+        LOG.info("getOraclePort:{},getUsername:{},getPassword:{}", oracleContainer.getOraclePort(),oracleContainer.getUsername(),oracleContainer.getPassword());
         JdbcIncrementalSource<String> oracleChangeEventSource =
                 new OracleSourceBuilder()
                         .hostname(oracleContainer.getHost())

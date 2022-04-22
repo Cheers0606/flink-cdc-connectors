@@ -37,25 +37,23 @@ public class RedoLogOffset extends Offset {
     public static final RedoLogOffset NO_STOPPING_OFFSET = new RedoLogOffset(Long.MIN_VALUE);
     public static final RedoLogOffset INITIAL_OFFSET = new RedoLogOffset(0);
 
-    private final Map<String, String> offset;
-
     public RedoLogOffset(Map<String, String> offset) {
         this.offset = offset;
     }
 
     public RedoLogOffset(String readUTF, long scn) {
-        offset = new HashMap<>();
-        offset.put(REDO_LOG_SCN_OFFSET_KEY, String.valueOf(scn));
+        this.offset = new HashMap<>();
+        this.offset.put(REDO_LOG_SCN_OFFSET_KEY, String.valueOf(scn));
     }
 
     public RedoLogOffset(long scn) {
-        offset = new HashMap<>();
-        offset.put(REDO_LOG_SCN_OFFSET_KEY, String.valueOf(scn));
+        this.offset = new HashMap<>();
+        this.offset.put(REDO_LOG_SCN_OFFSET_KEY, String.valueOf(scn));
     }
 
     public RedoLogOffset(String scn) {
-        offset = new HashMap<>();
-        offset.put(REDO_LOG_SCN_OFFSET_KEY, scn);
+        this.offset = new HashMap<>();
+        this.offset.put(REDO_LOG_SCN_OFFSET_KEY, scn);
     }
 
     public Map<String, String> getOffset() {

@@ -380,7 +380,7 @@ class LogMinerQueryResultProcessor {
                         if (redoSql != null) {
                             final TableId tableId =
                                     RowMapper.getTableId(
-                                            connectorConfig.getCatalogName(), resultSet);
+                                            null, resultSet);
                             dmlCounter++;
                             switch (operationCode) {
                                 case RowMapper.INSERT:

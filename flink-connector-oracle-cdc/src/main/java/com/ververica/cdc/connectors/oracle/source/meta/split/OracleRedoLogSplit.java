@@ -18,12 +18,12 @@
 
 package com.ververica.cdc.connectors.oracle.source.meta.split;
 
+import com.ververica.cdc.connectors.base.source.meta.split.FinishedSnapshotSplitInfo;
 import com.ververica.cdc.connectors.oracle.source.meta.offset.RedoLogOffset;
 import io.debezium.relational.TableId;
 import io.debezium.relational.history.TableChanges;
 
 import javax.annotation.Nullable;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;

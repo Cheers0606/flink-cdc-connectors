@@ -18,20 +18,6 @@
 
 package com.ververica.cdc.connectors.base.source;
 
-import org.apache.flink.annotation.Experimental;
-import org.apache.flink.api.common.typeinfo.TypeInformation;
-import org.apache.flink.api.connector.source.Boundedness;
-import org.apache.flink.api.connector.source.Source;
-import org.apache.flink.api.connector.source.SourceReader;
-import org.apache.flink.api.connector.source.SourceReaderContext;
-import org.apache.flink.api.connector.source.SplitEnumerator;
-import org.apache.flink.api.connector.source.SplitEnumeratorContext;
-import org.apache.flink.api.java.typeutils.ResultTypeQueryable;
-import org.apache.flink.connector.base.source.reader.RecordsWithSplitIds;
-import org.apache.flink.connector.base.source.reader.synchronization.FutureCompletingBlockingQueue;
-import org.apache.flink.core.io.SimpleVersionedSerializer;
-import org.apache.flink.util.FlinkRuntimeException;
-
 import com.ververica.cdc.connectors.base.config.JdbcSourceConfig;
 import com.ververica.cdc.connectors.base.config.JdbcSourceConfigFactory;
 import com.ververica.cdc.connectors.base.config.SourceConfig;
@@ -54,6 +40,19 @@ import com.ververica.cdc.connectors.base.source.reader.JdbcIncrementalSourceRead
 import com.ververica.cdc.connectors.base.source.reader.JdbcSourceSplitReader;
 import com.ververica.cdc.debezium.DebeziumDeserializationSchema;
 import io.debezium.relational.TableId;
+import org.apache.flink.annotation.Experimental;
+import org.apache.flink.api.common.typeinfo.TypeInformation;
+import org.apache.flink.api.connector.source.Boundedness;
+import org.apache.flink.api.connector.source.Source;
+import org.apache.flink.api.connector.source.SourceReader;
+import org.apache.flink.api.connector.source.SourceReaderContext;
+import org.apache.flink.api.connector.source.SplitEnumerator;
+import org.apache.flink.api.connector.source.SplitEnumeratorContext;
+import org.apache.flink.api.java.typeutils.ResultTypeQueryable;
+import org.apache.flink.connector.base.source.reader.RecordsWithSplitIds;
+import org.apache.flink.connector.base.source.reader.synchronization.FutureCompletingBlockingQueue;
+import org.apache.flink.core.io.SimpleVersionedSerializer;
+import org.apache.flink.util.FlinkRuntimeException;
 import org.apache.kafka.connect.source.SourceRecord;
 
 import java.util.List;
@@ -93,7 +92,18 @@ public class JdbcIncrementalSource<T>
                     }
                 };
     }
-
+    public JdbcIncrementalSource(
+            JdbcSourceConfigFactory configFactory,
+            DebeziumDeserializationSchema<T> deserializationSchema,
+            OffsetFactory offsetFactory,
+            JdbcDataSourceDialect dataSourceDialect,
+            SourceSplitSerializer sourceSplitSerializer) {
+        this.configFactory = configFactory;
+        this.deserializationSchema = deserializationSchema;
+        this.offsetFactory = offsetFactory;
+        this.dataSourceDialect = dataSourceDialect;
+        this.sourceSplitSerializer = sourceSplitSerializer;
+    }
     @Override
     public Boundedness getBoundedness() {
         return Boundedness.CONTINUOUS_UNBOUNDED;

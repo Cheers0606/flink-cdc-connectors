@@ -18,12 +18,6 @@
 
 package com.ververica.cdc.connectors.base.source.meta.split;
 
-import org.apache.flink.core.io.SimpleVersionedSerializer;
-import org.apache.flink.core.memory.DataInputDeserializer;
-import org.apache.flink.core.memory.DataOutputSerializer;
-import org.apache.flink.table.types.logical.RowType;
-import org.apache.flink.table.types.logical.utils.LogicalTypeParser;
-
 import com.ververica.cdc.connectors.base.source.meta.offset.Offset;
 import com.ververica.cdc.connectors.base.source.meta.offset.OffsetDeserializerSerializer;
 import com.ververica.cdc.connectors.base.source.meta.offset.OffsetFactory;
@@ -34,6 +28,11 @@ import io.debezium.document.DocumentReader;
 import io.debezium.document.DocumentWriter;
 import io.debezium.relational.TableId;
 import io.debezium.relational.history.TableChanges.TableChange;
+import org.apache.flink.core.io.SimpleVersionedSerializer;
+import org.apache.flink.core.memory.DataInputDeserializer;
+import org.apache.flink.core.memory.DataOutputSerializer;
+import org.apache.flink.table.types.logical.RowType;
+import org.apache.flink.table.types.logical.utils.LogicalTypeParser;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -127,7 +126,7 @@ public abstract class SourceSplitSerializer
 
         int splitKind = in.readInt();
         if (splitKind == SNAPSHOT_SPLIT_FLAG) {
-            TableId tableId = TableId.parse(in.readUTF(), false);
+            TableId tableId = TableId.parse(in.readUTF());
             String splitId = in.readUTF();
             RowType splitKeyType = (RowType) LogicalTypeParser.parse(in.readUTF());
             Object[] splitBoundaryStart = SerializerUtils.serializedStringToRow(in.readUTF());
@@ -191,7 +190,7 @@ public abstract class SourceSplitSerializer
         Map<TableId, TableChange> tableSchemas = new HashMap<>();
         final int size = in.readInt();
         for (int i = 0; i < size; i++) {
-            TableId tableId = TableId.parse(in.readUTF(),false);
+            TableId tableId = TableId.parse(in.readUTF());
             final String tableChangeStr;
             switch (version) {
                 case 1:
@@ -208,7 +207,7 @@ public abstract class SourceSplitSerializer
                     throw new IOException("Unknown version: " + version);
             }
             Document document = documentReader.read(tableChangeStr);
-            TableChange tableChange = FlinkJsonTableChangeSerializer.fromDocument(document, false);
+            TableChange tableChange = FlinkJsonTableChangeSerializer.fromDocument(document, true);
             tableSchemas.put(tableId, tableChange);
         }
         return tableSchemas;

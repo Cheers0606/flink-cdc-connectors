@@ -18,10 +18,9 @@
 
 package com.ververica.cdc.connectors.oracle.source.meta.split;
 
-import org.apache.flink.api.connector.source.SourceSplit;
-
 import io.debezium.relational.TableId;
 import io.debezium.relational.history.TableChanges;
+import org.apache.flink.api.connector.source.SourceSplit;
 
 import java.util.Map;
 import java.util.Objects;
@@ -56,7 +55,7 @@ public abstract class OracleSplit implements SourceSplit {
     }
 
     /** Casts this split into a {@link OracleRedoLogSplit}. */
-    public final OracleRedoLogSplit asBinlogSplit() {
+    public final OracleRedoLogSplit asRedoLogSplit() {
         return (OracleRedoLogSplit) this;
     }
 
